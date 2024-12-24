@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+        }
+        p {
+            font-size: 18px;
+        }
+        .order-details {
+            margin-top: 20px;
+        }
+        .order-details p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Order Confirmation</h1>
+        <p>Thank you for your purchase!</p>
+        <div class="order-details">
+            <p><strong>Product:</strong> {{ order.product.name }}</p>
+            <p><strong>Quantity:</strong> {{ order.quantity }}</p>
+            <p><strong>Total Price:</strong> ${{ order.total_price }}</p>
+            <p><strong>Order Date:</strong> {{ order.created_at|date:"F j, Y, g:i a" }}</p>
+        </div>
+    </div>
+</body>
+</html>

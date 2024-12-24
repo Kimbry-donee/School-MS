@@ -1,0 +1,279 @@
+{% extends 'base.html' %} 
+{% load form_tags %} 
+{% block content %}
+<form action="{% url 'polls:article'%}" method="post" enctype="multipart/form-data">
+    {% csrf_token %} 
+    {{ book_formset.management_form }}
+
+    <div class="space-y-6">
+        {% for  book in book_formset %}
+        <div class="p-6 bg-white rounded-lg shadow-md space-y-4">
+            <h3 class="text-lg font-semibold text-gray-700">Book Form</h3>
+
+            {% for field in book %} 
+            {% if field.name != 'id'%}
+            {{ field.label_tag|safe }} 
+            {% endif %}
+            {% if field.name == "authors" %}
+            <input
+                type="text"
+                id="selected-author"
+                placeholder="Click to select {{field.name}}"
+                readonly
+                class="w-full p-2 mb-2 border border-gray-300 rounded-md cursor-pointer author-selected"/>
+   
+            {{ field|add_class:"hidden" }} 
+            {% elif field.name == "publisher" %}
+            <input
+                    type="text"
+                    id="selected-pub"
+                    placeholder="Click to select {{field.name}}"
+                    readonly
+                    class="w-full p-2 mb-2 border border-gray-300 rounded-md cursor-pointer pub-selected" required=""/>
+            {{ field|add_class:"hidden" }} 
+            {% else %} 
+            {{ field|add_class:"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" }} 
+            {% endif %} 
+        {% if field.errors %}
+        <ul class="text-red-500 text-sm font-medium">
+        {% for error in field.errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-6">
+        <button
+            type="submit"
+            class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+            Submit
+        </button>
+    </div>
+</form>
+
+<!-- Modal for Authors -->
+      <div
+            id="author-modal"
+            class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+        >
+            <div class="bg-white p-6 rounded-md w-80 text-center author-modal-content">
+                <h2 class="text-lg font-semibold mb-4">
+                    Select Multiple Items
+                </h2>
+                <div id="author-list">
+                  {% for author in authors %}
+                    <span
+                        class="block mb-2 p-2 bg-gray-200 rounded-md cursor-pointer select-author"
+                       data-author-id='{{author.id}}' >{{ author.name }}</span
+                    >
+                    {% endfor %}
+  
+                </div>
+                <div class="mt-4">
+                    <button
+                        id="close-author-modal"
+                        class="px-4 py-2 bg-red-500 text-white rounded-md mr-2 author-close-btn"
+                    >
+                        Close
+                    </button>
+                    <button
+                        id="submit-selection"
+                        class="px-4 py-2 bg-green-500 text-white rounded-md submit-btn"
+                    >
+                        Done
+                    </button>
+                </div>
+            </div>
+        </div>
+
+<!-- Modal for Publisher -->
+        <div
+            id="pub-modal"
+            class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+        >
+            <div class="bg-white p-6 rounded-md w-80 text-center pub-modal-content">
+                <h2 class="text-lg font-semibold mb-4">
+                    Select publisher
+                </h2>
+                <div id="item-list">
+                  {% for publisher in publishers%}
+                    <span
+                        class="block mb-2 p-2 bg-gray-200 rounded-md cursor-pointer select-pub"
+                        data-publisher-id='{{publisher.id}}'>{{ publisher.name}}</span
+                    >
+                    {% endfor %}
+  
+                </div>
+                <div class="mt-4">
+                    <button
+                        id="close-pub-modal"
+                        class="px-4 py-2 bg-red-500 text-white rounded-md mr-2 pub-close-btn"
+                    >
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+  <script>
+    // Get modal, input, and other elements
+    const modal = document.getElementById("author-modal");
+    const inputField = document.getElementById('selected-author');
+    const closeModalBtn = document.getElementById("close-author-modal");
+    const submitSelectionBtn = document.getElementById("submit-selection");
+    const itemList = document.getElementById("author-list");
+    const items = document.querySelectorAll(".select-author");
+    const authorSelectId = document.getElementById('id_books-0-authors');
+  
+  // Publishers
+    const selectedItemInput = document.getElementById('selected-pub');
+  const pubModal = document.getElementById('pub-modal');
+  const modalContent = pubModal.querySelector('.pub-modal-content'); // Modal content
+  const closeModalButton = document.getElementById('close-pub-modal');
+  const selectItems = document.querySelectorAll('.select-pub');
+  const hiddenPublisherField = document.querySelector('[name="books-0-publisher"]')
+  
+
+let selectedAuthorIds = [];
+let tempSelectedAuthorIds = []; // Temporary array to hold selections
+
+// Function to update the display of selected authors
+function updateSelectedAuthorsDisplay() {
+    const count = tempSelectedAuthorIds.length;
+    if (count === 0) {
+        inputField.value = '';
+    } else if (count === 1) {
+        const authorName = authorSelectId.querySelector(`option[value='${tempSelectedAuthorIds[0]}']`).textContent;
+        inputField.value = authorName;
+    } else {
+        inputField.value = `${count} Authors selected`;
+    }
+}
+
+// Open modal when input is clicked
+inputField.addEventListener("click", function () {
+    // Copy the currently selected authors into the temporary array
+    tempSelectedAuthorIds = [...selectedAuthorIds];
+    
+    // Reset the visual selection in the modal
+    items.forEach(function (item) {
+        const authorId = item.getAttribute('data-author-id');
+        if (tempSelectedAuthorIds.includes(authorId)) {
+            item.classList.add("bg-green-500", "text-white");
+            item.classList.remove("bg-gray-200");
+        } else {
+            item.classList.remove("bg-green-500", "text-white");
+            item.classList.add("bg-gray-200");
+        }
+    });
+
+    modal.classList.remove("hidden");
+});
+
+// Close modal
+closeModalBtn.addEventListener("click", function () {
+    modal.classList.add("hidden");
+});
+
+// Toggle item selection
+items.forEach(function (item) {
+    item.addEventListener("click", function () {
+        const authorId = this.getAttribute('data-author-id');
+
+        if (tempSelectedAuthorIds.includes(authorId)) {
+            // Remove author from the temporary selection
+            tempSelectedAuthorIds = tempSelectedAuthorIds.filter(id => id !== authorId);
+            this.classList.remove("bg-green-500", "text-white");
+            this.classList.add("bg-gray-200");
+        } else {
+            // Add author to the temporary selection
+            tempSelectedAuthorIds.push(authorId);
+            this.classList.add("bg-green-500", "text-white");
+            this.classList.remove("bg-gray-200");
+        }
+
+        // Update the display in the custom input field
+        //updateSelectedAuthorsDisplay();
+    });
+});
+
+// Submit selection and close modal
+submitSelectionBtn.addEventListener("click", function () {
+    // Update the real selected authors
+    selectedAuthorIds = [...tempSelectedAuthorIds];
+
+    // Update the hidden select element (authorSelectId) with the selected authors
+    authorSelectId.querySelectorAll('option').forEach(option => {
+        option.selected = selectedAuthorIds.includes(option.value);
+    });
+
+    // Update the input field with the final selected authors
+    updateSelectedAuthorsDisplay();
+
+    // Close the modal
+    modal.classList.add("hidden");
+});
+
+// Close modal if clicking outside of modal content
+document.addEventListener('click', function (event) {
+    if (modal && !modal.classList.contains('hidden')) {
+        if (!modal.querySelector('.author-modal-content').contains(event.target) && event.target !== inputField) {
+            modal.classList.add('hidden');
+        }
+    }
+});
+  
+  // Publisher Modal
+// Publisher Modal
+selectedItemInput.addEventListener('click', function () {
+    pubModal.classList.remove('hidden');
+});
+
+// Close Modal when clicking the close button
+closeModalButton.addEventListener('click', function () {
+    pubModal.classList.add('hidden');
+});
+
+// Select Item and Close Modal
+let selectedPublisherId = null; // Track selected publisher ID
+selectItems.forEach(item => {
+    item.addEventListener('click', function () {
+        const publisherId = this.getAttribute('data-publisher-id');
+        const itemText = this.textContent;
+
+        // If a publisher was previously selected, reset its style
+        if (selectedPublisherId) {
+            const previousSelected = document.querySelector(`.select-pub[data-publisher-id="${selectedPublisherId}"]`);
+            previousSelected.classList.remove('bg-green-500', 'text-white');
+            previousSelected.classList.add('bg-gray-200');
+        }
+
+        // Apply the new style to the newly selected publisher
+        this.classList.remove('bg-gray-200');
+        this.classList.add('bg-green-500', 'text-white');
+
+        // Set the selected publisher ID and update the input field
+        selectedPublisherId = publisherId;
+        selectedItemInput.value = itemText;
+        hiddenPublisherField.value = publisherId;
+
+        // Close the modal
+        pubModal.classList.add('hidden');
+    });
+});
+
+// Close Modal when clicking outside the modal content
+document.addEventListener('click', function (event) {
+    if (pubModal && !pubModal.classList.contains('hidden')) {
+        if (!modalContent.contains(event.target) && event.target !== selectedItemInput) {
+            pubModal.classList.add('hidden');
+        }
+    }
+});
+  </script>
+
+{% endblock %}

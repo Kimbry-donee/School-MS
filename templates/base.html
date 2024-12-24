@@ -1,0 +1,18 @@
+{% load static tailwind_tags %}  <!-- Load static and tailwind template tags -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Django Project</title>
+    
+    <!-- Include the Tailwind CSS file -->
+    {% tailwind_css %}  <!-- This will include the compiled Tailwind CSS -->
+</head>
+<body class="">
+    {% block content %}
+    <!-- Content of your pages will go here -->
+    {% endblock %}
+</body>
+</html>

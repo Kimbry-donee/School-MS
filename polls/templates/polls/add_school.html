@@ -1,0 +1,11 @@
+<!-- add_school.html -->
+
+{% extends "base.html" %}
+{% block content %}
+  <h2>Add New School</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Add School</button>
+  </form>
+{% endblock %}

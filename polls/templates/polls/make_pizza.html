@@ -1,0 +1,11 @@
+{% extends 'base.html' %} 
+{% load form_tags %} 
+{% block content %}
+<form action="{% url 'polls:pizza'%}" method="post">
+  {% csrf_token %} 
+  {% for field in pizza_formset %}
+  {{ field.as_p }}  
+  {% endfor %}
+</form>
+    
+{% endblock %}
