@@ -1,0 +1,23 @@
+asgiref==3.8.1
+certifi==2024.8.30
+Cython==3.0.11
+distlib==0.3.9
+Django==5.1.2
+django-browser-reload==1.17.0
+django-tailwind==3.8.0
+filelock==3.16.1
+joblib==1.0.1
+meson==1.5.2
+meson-python==0.16.0
+numpy @ file:///home/builder/.termux-build/python-numpy/src/dist/numpy-2.2.0-cp312-cp312-linux_arm.whl#sha256=449d738609a4c6b8354e1e7b520b077e45df3beb584eda81fb09e7f45a965b4f
+packaging==24.1
+pipenv==2024.1.0
+platformdirs==4.3.6
+pyproject-metadata==0.8.1
+pytz==2024.2
+setuptools==75.1.0
+sqlparse==0.5.1
+tzdata==2024.2
+versioneer==0.29
+virtualenv==20.26.6
+wheel==0.44.0
